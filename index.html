@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExplainAI | Model Interpretation</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:#f4f5fb;color:#252746}
+header{background:#292c59;color:white;padding:22px 8%;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0}
+header span{color:#bfc5ff}
+main{max-width:950px;margin:35px auto;padding:0 18px}
+.hero{text-align:center;margin-bottom:28px}
+.hero h2{font-size:30px}
+.hero p{color:#6c7087;line-height:1.6}
+.card{background:white;padding:25px;border-radius:14px;margin-bottom:22px;box-shadow:0 4px 20px #2222440c}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+label{display:block;font-weight:bold;font-size:14px;margin-bottom:8px}
+input,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:7px}
+button{width:100%;padding:14px;background:#5559cf;color:white;border:0;border-radius:8px;margin-top:20px;font-size:16px;cursor:pointer}
+button:hover{background:#3f43ad}
+.result{display:none;background:#eeeeff;padding:20px;border-radius:10px;margin-top:20px}
+.result h3{color:#4449bb}
+.note{font-size:12px;color:#777;line-height:1.6}
+footer{text-align:center;padding:20px;color:#777}
+@media(max-width:600px){.grid{grid-template-columns:1fr}header{padding:18px;flex-wrap:wrap;gap:10px}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Explain<span>AI</span></h1>
+<div>Model Interpretation Dashboard</div>
+</header>
+
+<main>
+<section class="hero">
+<h2>Understand AI Predictions</h2>
+<p>Explore how input features influence a prediction and make AI decisions easier to understand.</p>
+</section>
+
+<section class="card">
+<h3>Enter Sample Data</h3>
+<form id="form">
+<div class="grid">
+<div>
+<label for="attendance">Attendance (%)</label>
+<input id="attendance" type="number" min="0" max="100" value="80" required>
+</div>
+<div>
+<label for="study">Daily Study Hours</label>
+<input id="study" type="number" min="0" max="24" value="4" step="0.5" required>
+</div>
+<div>
+<label for="marks">Previous Exam Marks (%)</label>
+<input id="marks" type="number" min="0" max="100" value="70" required>
+</div>
+<div>
+<label for="assignments">Assignments Completed (%)</label>
+<input id="assignments" type="number" min="0" max="100" value="75" required>
+</div>
+</div>
+<button type="submit">Generate Prediction</button>
+</form>
+
+<div class="result" id="result" aria-live="polite">
+<h3 id="prediction"></h3>
+<p id="explanation"></p>
+<strong>Feature Influence</strong>
+<canvas id="chart"></canvas>
+</div>
+</section>
+
+<section class="card">
+<h3>About ExplainAI</h3>
+<p>ExplainAI demonstrates how input features can influence a student performance prediction. It displays a result and a chart of feature contributions to help users interpret the outcome.</p>
+<p class="note">Academic demonstration only. This uses a simple illustrative JavaScript scoring formula, not a trained machine learning model or actual SHAP/LIME calculations.</p>
+</section>
+</main>
+
+<footer>ExplainAI | Explainable AI Project</footer>
+
+<script>
+let chart;
+
+document.getElementById("form").addEventListener("submit",function(e){
+e.preventDefault();
+
+const attendance=+document.getElementById("attendance").value;
+const study=+document.getElementById("study").value;
+const marks=+document.getElementById("marks").value;
+const assignments=+document.getElementById("assignments").value;
+
+const features=[
+attendance*0.30,
+Math.min(study/8*100,100)*0.20,
+marks*0.30,
+assignments*0.20
+];
+
+const score=Math.round(features.reduce((a,b)=>a+b,0));
+
+document.getElementById("prediction").textContent=
+score>=50?"Prediction: Likely to Pass":"Prediction: Needs Improvement";
+
+document.getElementById("explanation").textContent=
+"Illustrative score: "+score+"%. The chart shows each input's weighted contribution to this score.";
+
+document.getElementById("result").style.display="block";
+
+if(chart)chart.destroy();
+
+chart=new Chart(document.getElementById("chart"),{
+type:"bar",
+data:{
+labels:["Attendance","Study Hours","Previous Marks","Assignments"],
+datasets:[{
+label:"Contribution to Score",
+data:features,
+backgroundColor:["#777be0","#9a8ce8","#5e65c9","#b2a6f0"],
+borderRadius:5
+}]
+},
+options:{
+indexAxis:"y",
+responsive:true,
+scales:{x:{beginAtZero:true}},
+plugins:{legend:{display:false}}
+}
+});
+});
+</script>
+
+</body>
+</html>
